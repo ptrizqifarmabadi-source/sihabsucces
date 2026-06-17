@@ -81,6 +81,54 @@ export default function App() {
     }
   };
 
+  // --- Login State ---
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('sihab_logged_in') === 'true';
+    } catch (_) {
+      return false;
+    }
+  });
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    triggerVibration();
+    const cleanUser = usernameInput.trim().toLowerCase();
+    
+    if (cleanUser === 'sihab' && passwordInput === '1234') {
+      try {
+        localStorage.setItem('sihab_logged_in', 'true');
+      } catch (_) {}
+      setIsLoggedIn(true);
+      setLoginError('');
+      showToast('Login berhasil! Selamat berkarya, Ustadz Sihab.');
+    } else {
+      if (cleanUser !== 'sihab') {
+        setLoginError('ID Pengguna tidak terdaftar!');
+      } else {
+        setLoginError('Kata sandi salah!');
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    triggerVibration();
+    if (window.confirm('Apakah Anda yakin ingin keluar dari sesi saat ini?')) {
+      try {
+        localStorage.removeItem('sihab_logged_in');
+      } catch (_) {}
+      setIsLoggedIn(false);
+      setUsernameInput('');
+      setPasswordInput('');
+      setLoginError('');
+      showToast('Anda telah keluar.');
+    }
+  };
+
   // Category filter
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
@@ -481,6 +529,124 @@ export default function App() {
     return counts;
   }, [activeScheduleItems, currentChecked]);
 
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans antialiased text-slate-100 selection:bg-amber-400 selection:text-slate-950">
+        
+        {/* Toast Notification (Login-specific) */}
+        {toastMessage && (
+          <div className="fixed bottom-12 right-6 z-50 bg-slate-900 text-slate-100 px-4 py-3 rounded-lg shadow-lg border border-slate-800 flex items-center space-x-2 text-xs">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span className="font-medium">{toastMessage}</span>
+          </div>
+        )}
+
+        {/* Ambient light blobs */}
+        <div className="absolute top-[10%] left-[10%] w-60 h-60 rounded-full bg-emerald-500/10 blur-[90px] pointer-events-none" />
+        <div className="absolute bottom-[10%] right-[10%] w-60 h-60 rounded-full bg-amber-500/10 blur-[90px] pointer-events-none" />
+
+        {/* Secure Login Box Container */}
+        <div id="login-container" className="w-full max-w-sm bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800 p-6 sm:p-8 shadow-2xl relative z-10">
+          
+          {/* Header / Brand block */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-400 text-slate-950 mb-3 shadow-[0_4px_12px_rgba(251,191,36,0.3)]">
+              <Compass className="w-6 h-6 shrink-0" />
+            </div>
+            <h2 className="text-xs font-mono font-extrabold text-amber-400 tracking-widest uppercase">
+              PORTAL OTENTIKASI
+            </h2>
+            <h1 className="text-xl font-display font-extrabold text-white mt-1.5 tracking-tight">
+              SIHAB SUCCESS SYSTEM
+            </h1>
+            <p className="text-[10px] font-mono text-slate-400 mt-1 uppercase">
+              Daily Workspace Terminal
+            </p>
+          </div>
+
+          {/* Motivational Quote banner */}
+          <div className="bg-slate-950/65 border border-slate-800/80 p-3 rounded-xl mb-5 text-center">
+            <p className="text-[11px] text-slate-300 italic font-serif leading-relaxed">
+              &quot;Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.&quot;
+            </p>
+            <p className="text-[9px] text-amber-500/80 font-mono mt-1 font-bold">- HR. Ahmad</p>
+          </div>
+
+          {/* Validation messages / Errors */}
+          {loginError && (
+            <div className="bg-rose-500/10 border border-rose-500/25 p-2.5 rounded-lg mb-4 text-[11px] flex items-center gap-2 font-medium text-rose-450 text-rose-400">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          {/* Form actions */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">
+                ID Pengguna
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Masukkan ID (sihab)"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                autoCapitalize="none"
+                autoComplete="username"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition placeholder-slate-600"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">
+                Kata Sandi (Password)
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="Masukkan sandi (1234)"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  autoComplete="current-password"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-hidden focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition placeholder-slate-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[10px] font-mono text-slate-405 font-medium text-slate-400 hover:text-slate-100"
+                >
+                  {showPassword ? 'Sembunyikan' : 'Lihat'}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs tracking-wide transition duration-150 active:scale-[0.98] mt-2 shadow-lg"
+            >
+              MASUK SEKARANG
+            </button>
+          </form>
+
+          {/* Hint credentials bottom helper strictly matching request */}
+          <div className="mt-6 pt-3.5 border-t border-slate-800/80 text-center">
+            <span className="text-[10px] font-mono text-slate-500">
+              Gunakan ID: <strong className="text-amber-400/80">sihab</strong> &amp; Sandi: <strong className="text-amber-400/80">1234</strong>
+            </span>
+          </div>
+
+        </div>
+
+        <p className="text-[9px] text-slate-600 font-mono mt-6 uppercase tracking-wider">
+          Sihab Success System v2 • Offline Secured Local Session
+        </p>
+
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 antialiased h-screen lg:overflow-hidden">
       
@@ -631,17 +797,35 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex items-center space-x-2.5">
-            <div className="w-7 h-7 rounded-md bg-amber-400 flex items-center justify-center shrink-0 text-xs font-bold font-mono text-slate-950 shadow-md">
-              PT
+          <div className="space-y-2.5">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-7 h-7 rounded-md bg-amber-400 flex items-center justify-center shrink-0 text-xs font-bold font-mono text-slate-950 shadow-md">
+                PT
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs text-white block truncate font-medium">
+                  ptrizqifarmabadi@gmail.com
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono block">
+                  Lead Teacher & Planner
+                </span>
+              </div>
             </div>
-            <div className="min-w-0">
-              <span className="text-xs text-white block truncate font-medium">
-                ptrizqifarmabadi@gmail.com
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono block">
-                Lead Teacher & Planner
-              </span>
+
+            <div className="border-t border-slate-900 pt-2.5 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] text-slate-400 font-mono">
+                  Sesi: <strong className="text-white">sihab</strong>
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="text-[9px] font-mono font-bold bg-rose-950/40 text-rose-400 hover:text-rose-350 border border-rose-900/30 px-1.5 py-0.5 rounded transition duration-150 active:scale-95 touch-manipulation"
+                title="Keluar dari sesi ini"
+              >
+                LOGOUT
+              </button>
             </div>
           </div>
         </div>
@@ -715,6 +899,15 @@ export default function App() {
               >
                 <Share2 className="w-3.5 h-3.5 shrink-0" />
                 <span className="hidden xs:inline">Lapor</span>
+              </button>
+
+              {/* Logout button for mobile */}
+              <button
+                onClick={handleLogout}
+                className="bg-slate-150 border border-slate-200 hover:bg-slate-200 text-slate-700 font-bold text-[10px] px-2 py-1 rounded-md transition hover:text-slate-900 shrink-0 lg:hidden touch-manipulation font-mono"
+                title="Keluar"
+              >
+                Keluar
               </button>
 
               {/* Clock widget for desktop */}
