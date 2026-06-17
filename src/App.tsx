@@ -22,7 +22,8 @@ import {
   Award,
   CheckCircle,
   HelpCircle,
-  HeartHandshake
+  HeartHandshake,
+  Compass
 } from 'lucide-react';
 import {
   WEEKDAY_SCHEDULE,
@@ -33,6 +34,7 @@ import {
   CATEGORY_STYLES,
   ScheduleItem
 } from './data/schedules';
+import IslamicPocketBook from './components/IslamicPocketBook';
 
 // Helper to format date to YYYY-MM-DD local string
 const toLocalDateKey = (date: Date): string => {
@@ -70,8 +72,15 @@ export default function App() {
   }>({});
   
   // Active Tab for panels
-  const [activeTab, setActiveTab] = useState<'planner' | 'rules' | 'history'>('planner');
+  const [activeTab, setActiveTab] = useState<'planner' | 'rules' | 'history' | 'prayers'>('planner');
   
+  // Safe vibration feedback for mobile Android
+  const triggerVibration = () => {
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(30);
+    }
+  };
+
   // Category filter
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
@@ -561,10 +570,28 @@ export default function App() {
             >
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-4 h-4 shrink-0 text-indigo-400" />
-                <span>Sejarah & Cadangan</span>
+                <span>Sejarah &amp; Cadangan</span>
               </div>
               <span className="text-[10px] font-mono bg-indigo-500/20 text-indigo-300 px-1 py-0.2 rounded font-bold">
                 DATA
+              </span>
+            </button>
+
+            <button
+              id="tab-btn-prayers"
+              onClick={() => setActiveTab('prayers')}
+              className={`w-full px-3 py-2 rounded-lg text-xs transition duration-150 flex items-center justify-between font-medium ${
+                activeTab === 'prayers'
+                  ? 'bg-slate-800 text-amber-400 font-bold border-l-4 border-amber-400 shadow-sm'
+                  : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-100'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Compass className="w-4 h-4 shrink-0 text-amber-300" />
+                <span>Buku Doa &amp; Dzikir NU</span>
+              </div>
+              <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded font-bold uppercase">
+                KITAB
               </span>
             </button>
           </nav>
@@ -645,7 +672,7 @@ export default function App() {
                 </span>
                 <div className="h-4 w-px bg-slate-200" />
                 <h2 className="text-xs font-mono font-bold text-slate-500 tracking-wider">
-                  {activeTab === 'planner' ? 'DAILY PLANNER MATRIX' : activeTab === 'rules' ? 'GOLDEN COMPASS' : 'HISTORICAL METRICS'}
+                  {activeTab === 'planner' ? 'DAILY PLANNER MATRIX' : activeTab === 'rules' ? 'GOLDEN COMPASS' : activeTab === 'prayers' ? 'KITAB DOA & DZIKIR' : 'HISTORICAL METRICS'}
                 </h2>
               </div>
             </div>
@@ -1481,6 +1508,11 @@ export default function App() {
             </div>
           )}
 
+          {/* ================================= TAB 4: ISLAMIC POCKET BOOK ================================= */}
+          {activeTab === 'prayers' && (
+            <IslamicPocketBook />
+          )}
+
         </div>
 
         {/* ================================= FOOTER ACTIVITY REMINDER STREAM BAR ================================= */}
@@ -1503,47 +1535,62 @@ export default function App() {
         </footer>
 
         {/* ================================= MOBILE BOTTOM NAVIGATION BAR (Android optimization) ================================= */}
-        <nav className="lg:hidden h-16 bg-slate-900 border-t border-slate-800 px-2 flex items-center justify-around shrink-0 z-30 shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+        <nav className="lg:hidden h-16 bg-slate-900 border-t border-slate-800 px-1 flex items-center justify-around shrink-0 z-30 shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
           <button
-            onClick={() => setActiveTab('planner')}
+            onClick={() => { triggerVibration(); setActiveTab('planner'); }}
             className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
               activeTab === 'planner' 
                 ? 'text-amber-400 font-bold' 
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-400'
             }`}
           >
-            <ClipboardCheck className={`w-5.5 h-5.5 mb-1 transition-transform ${activeTab === 'planner' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
-            <span className="text-[10.5px] tracking-tight">Agenda</span>
+            <ClipboardCheck className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'planner' ? 'scale-110 text-amber-400 animate-pulse' : 'text-slate-400'}`} />
+            <span className="text-[9.5px] tracking-tight">Agenda</span>
             {activeTab === 'planner' && (
               <div className="absolute bottom-1 w-1.5 h-1.5 bg-amber-400 rounded-full" />
             )}
           </button>
 
           <button
-            onClick={() => setActiveTab('rules')}
+            onClick={() => { triggerVibration(); setActiveTab('prayers'); }}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
+              activeTab === 'prayers' 
+                ? 'text-amber-400 font-bold' 
+                : 'text-slate-400'
+            }`}
+          >
+            <Compass className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'prayers' ? 'scale-110 text-amber-300 animate-pulse' : 'text-slate-400'}`} />
+            <span className="text-[9.5px] tracking-tight">Doa &amp; Dzikir</span>
+            {activeTab === 'prayers' && (
+              <div className="absolute bottom-1 w-1.5 h-1.5 bg-amber-300 rounded-full" />
+            )}
+          </button>
+
+          <button
+            onClick={() => { triggerVibration(); setActiveTab('rules'); }}
             className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
               activeTab === 'rules' 
                 ? 'text-amber-400 font-bold' 
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-400'
             }`}
           >
-            <Award className={`w-5.5 h-5.5 mb-1 transition-transform ${activeTab === 'rules' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
-            <span className="text-[10.5px] tracking-tight">Aturan Emas</span>
+            <Award className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'rules' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+            <span className="text-[9.5px] tracking-tight">Aturan Emas</span>
             {activeTab === 'rules' && (
               <div className="absolute bottom-1 w-1.5 h-1.5 bg-amber-400 rounded-full" />
             )}
           </button>
 
           <button
-            onClick={() => setActiveTab('history')}
+            onClick={() => { triggerVibration(); setActiveTab('history'); }}
             className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
               activeTab === 'history' 
                 ? 'text-amber-400 font-bold' 
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-400'
             }`}
           >
-            <TrendingUp className={`w-5.5 h-5.5 mb-1 transition-transform ${activeTab === 'history' ? 'scale-110 text-indigo-400' : 'text-slate-400'}`} />
-            <span className="text-[10.5px] tracking-tight">Sejarah</span>
+            <TrendingUp className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'history' ? 'scale-110 text-indigo-400' : 'text-slate-400'}`} />
+            <span className="text-[9.5px] tracking-tight">Sejarah</span>
             {activeTab === 'history' && (
               <div className="absolute bottom-1 w-1.5 h-1.5 bg-indigo-400 rounded-full" />
             )}
