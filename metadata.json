@@ -1,0 +1,6 @@
+{
+  "name": "Sihab Success Under 40",
+  "description": "Aplikasi agenda harian interaktif Sihab Succes Under 40 Tahun dengan ceklis harian, spirit Rasulullah ﷺ, aturan emas, dan pelacak sejarah progress harian.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
