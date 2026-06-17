@@ -484,7 +484,7 @@ export default function App() {
       )}
 
       {/* ================================= SIDEBAR AREA (Desktop fixed, Mobile collapsible space) ================================= */}
-      <aside className="w-full lg:w-64 bg-slate-900 text-slate-100 flex flex-col shrink-0 border-r border-slate-800 pt-5 lg:overflow-y-auto justify-between">
+      <aside className="hidden lg:flex w-full lg:w-64 bg-slate-900 text-slate-100 flex-col shrink-0 border-r border-slate-800 pt-5 lg:overflow-y-auto justify-between">
         <div className="px-5">
           {/* Main Logo block */}
           <div className="mb-6">
@@ -624,49 +624,88 @@ export default function App() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         
         {/* Dynamic header row containing quick dates & widgets */}
-        <header className="h-16 bg-white border-b border-slate-200/80 px-4 md:px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-3">
-            <span className="text-xs bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded border border-slate-200 font-mono">
-              {activeScheduleType === 'weekday' ? 'HARI MENGAJAR' : activeScheduleType === 'saturday' ? 'HARI KONTEN' : 'HARI MANDIRI'}
-            </span>
-            <div className="h-4 w-px bg-slate-200" />
-            <h2 className="text-xs font-mono font-bold text-slate-500 tracking-wider">
-              {activeTab === 'planner' ? 'DAILY PLANNER MATRIX' : activeTab === 'rules' ? 'GOLDEN COMPASS' : 'HISTORICAL METRICS'}
-            </h2>
+        <header className="bg-white border-b border-slate-200/80 shrink-0">
+          {/* Main top bar */}
+          <div className="h-14 lg:h-16 px-3 md:px-6 flex items-center justify-between">
+            
+            {/* Left: Mobile Title (hidden on desktop because sidebar has it) or Brand Status */}
+            <div className="flex items-center space-x-2">
+              <div className="lg:hidden">
+                <div className="flex items-center space-x-1">
+                  <span className="bg-amber-400 text-slate-950 font-mono font-extrabold text-[9px] px-1.5 py-0.5 rounded tracking-wide uppercase">
+                    SIHAB SUCCESS
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-1 py-0.5 rounded shrink-0">⭐ {statistics.streak}d</span>
+                </div>
+              </div>
+              
+              <div className="hidden lg:flex items-center space-x-2.5">
+                <span className="text-xs bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded border border-slate-200 font-mono">
+                  {activeScheduleType === 'weekday' ? 'HARI MENGAJAR' : activeScheduleType === 'saturday' ? 'HARI KONTEN' : 'HARI MANDIRI'}
+                </span>
+                <div className="h-4 w-px bg-slate-200" />
+                <h2 className="text-xs font-mono font-bold text-slate-500 tracking-wider">
+                  {activeTab === 'planner' ? 'DAILY PLANNER MATRIX' : activeTab === 'rules' ? 'GOLDEN COMPASS' : 'HISTORICAL METRICS'}
+                </h2>
+              </div>
+            </div>
+
+            {/* Middle: Quick calendar days navigation */}
+            <div className="flex items-center space-x-1 text-xs">
+              <button
+                onClick={() => handleDayOffset(-1)}
+                className="p-1.5 hover:bg-slate-100 text-slate-600 rounded transition touch-manipulation"
+                title="Kembali"
+              >
+                <ChevronLeft className="w-4.5 h-4.5" />
+              </button>
+              <span className="font-display font-semibold text-slate-900 px-1 min-w-[90px] sm:min-w-[120px] text-center text-xs sm:text-sm">
+                {selectedDate.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </span>
+              <button
+                onClick={() => handleDayOffset(1)}
+                className="p-1.5 hover:bg-slate-100 text-slate-600 rounded transition touch-manipulation"
+                title="Lanjut"
+              >
+                <ChevronRight className="w-4.5 h-4.5" />
+              </button>
+
+              <button
+                onClick={handleJumpToToday}
+                className="ml-1 sm:ml-2 font-mono font-bold text-[9px] sm:text-[10px] bg-amber-400 hover:bg-amber-500 text-slate-950 px-2 py-1 rounded transition whitespace-nowrap shadow-xs touch-manipulation"
+              >
+                HARI INI
+              </button>
+            </div>
+
+            {/* Right: Quick clock & action buttons on mobile */}
+            <div className="flex items-center space-x-1.5">
+              {/* WhatsApp Quick Sync action button, highly accessible on mobile */}
+              <button
+                onClick={handleShareToWife}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2.5 py-1 rounded-md transition shadow-xs flex items-center space-x-1 shrink-0 lg:hidden touch-manipulation"
+                title="Lapor Istri"
+              >
+                <Share2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xs:inline">Lapor</span>
+              </button>
+
+              {/* Clock widget for desktop */}
+              <div className="hidden md:flex items-center space-x-1.5 bg-slate-900 text-emerald-400 px-2.5 py-1 rounded text-xs font-mono font-bold shadow-inner flex-shrink-0">
+                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>{currentDateState.toLocaleTimeString('id-ID')}</span>
+              </div>
+            </div>
           </div>
 
-          {/* Quick calendar and today buttons */}
-          <div className="flex items-center space-x-1 text-xs">
-            <button
-              onClick={() => handleDayOffset(-1)}
-              className="p-1.5 hover:bg-slate-100 text-slate-600 rounded transition"
-              title="Kembali ke hari sebelumnya"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="font-display font-medium text-slate-900 px-2 min-w-[120px] text-center">
-              {selectedDate.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}
+          {/* Quick Informational / Warning banner for mobile underneath head */}
+          <div className="lg:hidden bg-slate-50 border-t border-slate-150 px-3 py-1.5 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+            <span className="truncate">
+              Tipe Hari: <strong className="text-slate-800 uppercase">{activeScheduleType === 'weekday' ? 'Mengajar' : activeScheduleType === 'saturday' ? 'Konten' : 'Mandiri'}</strong>
             </span>
-            <button
-              onClick={() => handleDayOffset(1)}
-              className="p-1.5 hover:bg-slate-100 text-slate-600 rounded transition"
-              title="Lanjut ke hari berikutnya"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={handleJumpToToday}
-              className="ml-2 font-mono font-bold text-[10px] bg-amber-400 hover:bg-amber-500 text-slate-950 px-2.5 py-1 rounded transition whitespace-nowrap shadow-xs"
-            >
-              TODAY
-            </button>
-          </div>
-
-          {/* Clock Display */}
-          <div className="hidden md:flex items-center space-x-1.5 bg-slate-900 text-emerald-400 px-2.5 py-1 rounded text-xs font-mono font-bold shadow-inner">
-            <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span>{currentDateState.toLocaleTimeString('id-ID')}</span>
+            <span className="text-emerald-650 font-bold shrink-0 ml-2">
+              Progress: {currentChecked.length}/{activeScheduleItems.length} ({progressPercent}%)
+            </span>
           </div>
         </header>
 
@@ -680,6 +719,38 @@ export default function App() {
               {/* Grid 1: The Main Schedule checklist box (Left Column) */}
               <div className="col-span-12 lg:col-span-8 flex flex-col space-y-4">
                 
+                {/* Mobile Welcome Panel - only visible on small screens (Android optimization) */}
+                <div className="lg:hidden bg-slate-900 text-white rounded-xl p-3 sm:p-4 border border-slate-800 shadow-md">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[9px] font-mono text-amber-400 tracking-wider uppercase font-bold">INFO PROFIL PERJUANGAN</p>
+                      <h3 className="text-xs font-bold text-white mt-0.5 truncate max-w-[210px]">ptrizqifarmabadi@gmail.com</h3>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">Lead Teacher &amp; Planner Control Box</p>
+                    </div>
+                    <div className="bg-slate-800 text-center px-2.5 py-1 rounded-lg border border-slate-700 shadow-sm shrink-0">
+                      <span className="text-[8px] font-mono text-slate-300 block uppercase">STREAK</span>
+                      <span className="text-sm font-mono font-extrabold text-amber-400">{statistics.streak} HARI</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-slate-800/40 border border-slate-800/80 p-2.5 rounded-lg mt-3 text-[11px] text-slate-300 italic font-serif leading-relaxed">
+                    &quot;Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.&quot;
+                  </div>
+
+                  <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-slate-300">
+                      🏅 {statistics.goldDays} Hari Emas Tercapai
+                    </span>
+                    <button
+                      onClick={handleShareToWife}
+                      className="text-emerald-400 hover:text-emerald-300 font-extrabold flex items-center gap-1 text-[10.5px] bg-slate-950 px-2 py-1 rounded border border-slate-800 active:scale-95 transition"
+                    >
+                      <Share2 className="w-3 h-3 text-emerald-400" />
+                      <span>Sync Istri</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* 7-Days Quick Selection Date Slider (High density visualization) */}
                 <div id="date-slider-container" className="bg-white rounded-xl border border-slate-200 shadow-xs p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -1430,6 +1501,54 @@ export default function App() {
             Sihab Success Under 40 Tahun © {new Date().getFullYear()}
           </div>
         </footer>
+
+        {/* ================================= MOBILE BOTTOM NAVIGATION BAR (Android optimization) ================================= */}
+        <nav className="lg:hidden h-16 bg-slate-900 border-t border-slate-800 px-2 flex items-center justify-around shrink-0 z-30 shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+          <button
+            onClick={() => setActiveTab('planner')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
+              activeTab === 'planner' 
+                ? 'text-amber-400 font-bold' 
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ClipboardCheck className={`w-5.5 h-5.5 mb-1 transition-transform ${activeTab === 'planner' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+            <span className="text-[10.5px] tracking-tight">Agenda</span>
+            {activeTab === 'planner' && (
+              <div className="absolute bottom-1 w-1.5 h-1.5 bg-amber-400 rounded-full" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('rules')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
+              activeTab === 'rules' 
+                ? 'text-amber-400 font-bold' 
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Award className={`w-5.5 h-5.5 mb-1 transition-transform ${activeTab === 'rules' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+            <span className="text-[10.5px] tracking-tight">Aturan Emas</span>
+            {activeTab === 'rules' && (
+              <div className="absolute bottom-1 w-1.5 h-1.5 bg-amber-400 rounded-full" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative touch-manipulation ${
+              activeTab === 'history' 
+                ? 'text-amber-400 font-bold' 
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <TrendingUp className={`w-5.5 h-5.5 mb-1 transition-transform ${activeTab === 'history' ? 'scale-110 text-indigo-400' : 'text-slate-400'}`} />
+            <span className="text-[10.5px] tracking-tight">Sejarah</span>
+            {activeTab === 'history' && (
+              <div className="absolute bottom-1 w-1.5 h-1.5 bg-indigo-400 rounded-full" />
+            )}
+          </button>
+        </nav>
 
       </div>
 
